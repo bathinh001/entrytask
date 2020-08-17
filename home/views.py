@@ -11,7 +11,7 @@ from django.shortcuts import HttpResponse
 from datetime import datetime, timedelta
 from Event.views import create_event
 
-TIME_EXPIRED = 0.5 #minutes
+TIME_EXPIRED = 5 #minutes
 
 
 @csrf_exempt

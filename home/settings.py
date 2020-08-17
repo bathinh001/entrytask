@@ -82,7 +82,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'entrytask_centos_db',
         'USER': 'bathinh001',
-        'HOST': '10.6.19.33',
+        'HOST': '192.168.56.102',
         'PASSWORD': 'Thinh24031999@gmail.com'
     }
 }
@@ -124,5 +124,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

@@ -12,7 +12,7 @@ def view_user_activity(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
 
     # schema request body
     schema = {
@@ -33,7 +33,7 @@ def view_user_activity(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Error Validation of JSON schema in request body", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
 
     # load data
     user_id = json.loads(request.body)['user_id']

@@ -26,9 +26,9 @@ def login(request):
             if check:
                 type_user = check.get('type', None)
                 response = HttpResponse('Login successful', status=200)
-                if type_user == 0:
+                '''if type_user == 0:
                     response = redirect(create_event)
-                    response.status_code = 301
+                    response.status_code = 301'''
                 token = attach_token(username, TIME_EXPIRED)
                 response.set_cookie(key='Authorization', value=token, expires=timedelta(minutes=TIME_EXPIRED)+datetime.utcnow())
                 return response
@@ -37,4 +37,3 @@ def login(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form, 'message': message})
-

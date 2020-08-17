@@ -4,7 +4,7 @@ import jwt
 import json
 from jsonschema import validate
 from datetime import datetime, timedelta
-
+from django.core.cache import cache
 
 SECRET_KEY = '^gph2f8zqdsb-rog*a4lj=1k%5afio5vw_i4uvl683(^$r!u(9'
 ALGORITHM='HS512'
@@ -12,11 +12,15 @@ ALGORITHM='HS512'
 
 def verify(username, password):
     hash_pw = str(hashlib.sha512(password).hexdigest())
-    try:
-        data = UserTab.objects.values('type', 'password').get(username=username)
-    except:
-        return None
-    stored_pw = data.get('password', None)
+    cache_key = username
+    cache_time = 86400
+    stored_pw = cache.get(cache_key)
+    if not stored_pw:
+        try:
+            data = UserTab.objects.values('type', 'password').get(username=username)
+        except:
+            return None
+        stored_pw = data.get('password', None)
     if not stored_pw or hash_pw[:100] != stored_pw:
         return None
     return data

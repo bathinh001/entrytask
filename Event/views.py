@@ -12,6 +12,7 @@ from django.shortcuts import render
 import time
 from django.views.decorators.csrf import csrf_exempt
 from home.forms import CreateEventForm
+from django.core.cache import cache
 # Create your views here.
 ############################################GET########################################################
 

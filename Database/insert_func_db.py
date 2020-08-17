@@ -178,3 +178,16 @@ def edit_event_channel():
         ec[i].save()
         print(i,ec[i].channel_id)
         i+=1
+import csv
+def printcsv():
+    with open('datauser.csv', 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(["username", "password"])
+        for i in range(500, 2000):
+            user = UserTab()
+            type = list(UserTab.objects.filter(user_id=i).values_list('type', flat=True))[0]
+            if not type:
+                continue
+            username = list(UserTab.objects.filter(user_id=i).values_list('username', flat=True))[0]
+            salt = list(UserTab.objects.filter(user_id=i).values_list('salt', flat=True))[0]
+            writer.writerow([username, username+salt])

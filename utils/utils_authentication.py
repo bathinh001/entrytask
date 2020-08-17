@@ -14,8 +14,7 @@ ALGORITHM='HS512'
 def verify(username, password):
     hash_pw = str(hashlib.sha512(password).hexdigest())
     cache_key = username
-    cache_time = 86400
-    stored_pw = cache.get(cache_key)
+    stored_pw = cache.get(cache_key, None)
     if not stored_pw:
         try:
             data = UserTab.objects.values('type', 'password').get(username=username)
@@ -24,7 +23,8 @@ def verify(username, password):
         stored_pw = data.get('password', None)
     if not stored_pw or hash_pw[:100] != stored_pw:
         return None
-    return data
+    cache.set(cache_key, stored_pw)
+    return {username: stored_pw}
 ##################################################################################################
 
 
@@ -128,3 +128,6 @@ def authorization(request):
     res['type'] = type
     return res
 ##################################################################################################
+
+
+# def verify_data

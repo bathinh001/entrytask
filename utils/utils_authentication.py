@@ -12,7 +12,10 @@ ALGORITHM='HS512'
 
 def verify(username, password):
     hash_pw = str(hashlib.sha512(password).hexdigest())
-    data = UserTab.objects.values('type', 'password').get(username=username)
+    try:
+        data = UserTab.objects.values('type', 'password').get(username=username)
+    except:
+        return None
     stored_pw = data.get('password', None)
     if not stored_pw or hash_pw[:100] != stored_pw:
         return None

@@ -6,6 +6,7 @@ from jsonschema import validate
 from datetime import datetime, timedelta
 from django.core.cache import cache
 from django import forms
+from django.http import JsonResponse
 
 SECRET_KEY = '^gph2f8zqdsb-rog*a4lj=1k%5afio5vw_i4uvl683(^$r!u(9'
 ALGORITHM='HS512'
@@ -129,5 +130,10 @@ def authorization(request):
     return res
 ##################################################################################################
 
-
-# def verify_data
+TIME_EXPIRED = 360
+def response_login(username):
+    res = {'message': 'Login successfully'}
+    response = JsonResponse(res, status=200)
+    token = attach_token(username, TIME_EXPIRED)
+    response.set_cookie(key='Authorization', value=token, expires=timedelta(minutes=TIME_EXPIRED)+datetime.utcnow())
+    return response

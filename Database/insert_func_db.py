@@ -183,7 +183,7 @@ def printcsv():
     with open('datauser.csv', 'w') as file:
         writer = csv.writer(file)
         writer.writerow(["username", "password"])
-        for i in range(500, 2000):
+        for i in range(500, 10000):
             user = UserTab()
             type = list(UserTab.objects.filter(user_id=i).values_list('type', flat=True))[0]
             if not type:

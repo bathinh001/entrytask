@@ -20,5 +20,5 @@ from . import views
 urlpatterns = [
     url(r'^event/', include('Event.urls')),
     url(r'^user/', include('User.urls')),
-    url(r'', views.login)
+    url(r'^login/$', views.login)
 ]

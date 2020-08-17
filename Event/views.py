@@ -21,7 +21,7 @@ def view_event(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
 
 
     # validate the request body
@@ -41,7 +41,7 @@ def view_event(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
 
 
     # load model
@@ -83,8 +83,7 @@ def view_list_event(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
-
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
     schema = {
         "type": "object",
         "description": "Structure of a body request to view list of event by certain fields",
@@ -124,7 +123,7 @@ def view_list_event(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
     # load model
     event = apps.get_model('Database', 'EventTab')
     event_channel = apps.get_model('Database', 'EventChannelTab')
@@ -168,7 +167,7 @@ def view_list_participant(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
 
     schema = {
         "type": "object",
@@ -195,7 +194,7 @@ def view_list_participant(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
     # load model
     user = apps.get_model('Database', 'UserTab')
     participant = apps.get_model('Database', 'ParticipantTab')
@@ -227,7 +226,7 @@ def view_list_like(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
 
     schema = {
         "type": "object",
@@ -254,7 +253,7 @@ def view_list_like(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
     # load model
     user = apps.get_model('Database', 'UserTab')
     like = apps.get_model('Database', 'LikeTab')
@@ -286,8 +285,7 @@ def view_list_comment(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
-
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
 
     schema = {
         "type": "object",
@@ -314,7 +312,7 @@ def view_list_comment(request):
     try:
         validate(instance=json.loads(request.body), schema=schema)
     except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
+        return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
     # load model
     user = apps.get_model('Database', 'UserTab')
     comment = apps.get_model('Database', 'CommentTab')
@@ -349,164 +347,170 @@ def view_list_comment(request):
 
 ############################################POST#######################################################
 
-
+@csrf_exempt
 def like_action(request):
-    # Authorization
-    auth = authorization(request)
-    if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+    if request.method=='POST':
+        # Authorization
+        auth = authorization(request)
+        if auth['status'] >= 400:
+            return JsonResponse({'message': auth['message']}, status=auth['status'])
 
-    schema = {
-        "type": "object",
-        "description": "Structure of a body request to make like action",
-        "maxProperties": 2,
-        "properties": {
-            "event_id": {
-                "description": "The unique identifier for event",
-                "type": "number",
-                "exclusiveMinimum": 0,
+        schema = {
+            "type": "object",
+            "description": "Structure of a body request to make like action",
+            "maxProperties": 2,
+            "properties": {
+                "event_id": {
+                    "description": "The unique identifier for event",
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                },
+                "flag": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                },
             },
-            "flag": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-            },
-        },
-        "required": ["event_id", "flag"]
-    }
-    # validate the request body
-    try:
-        validate(instance=json.loads(request.body), schema=schema)
-    except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
-    # load model
-    like = apps.get_model('Database', 'LikeTab')
-    event = apps.get_model('Database', 'EventTab')
-    res = {'status': 0, 'result': {}}
+            "required": ["event_id", "flag"]
+        }
+        # validate the request body
+        try:
+            validate(instance=json.loads(request.body), schema=schema)
+        except:
+            return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
+        # load model
+        like = apps.get_model('Database', 'LikeTab')
+        event = apps.get_model('Database', 'EventTab')
+        res = {'status': 0, 'result': {}}
 
-    data = json.loads(request.body)
+        data = json.loads(request.body)
 
-    # get parameter
-    status = data.get('flag', None)
-    event_id = data.get('event_id', None)
-    user_id = auth.get('user_id', None)
-    # query
-    if not is_valid_event(event_id) or not is_valid_user(user_id):
-        res['status']=1
-        return JsonResponse(res, status=400)
-    else:
-        obj = like.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'date': int(time.time()), 'status': ((status+1) % 2)})
-        like_id = list(like.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
-        count = len(like.objects.filter(event_id=event_id, status=1).values_list(flat=True))
-        result = {'like_id': like_id, 'count_like': count}
-        res['result'] = result
-    return JsonResponse(res, status=201)
-
-
-def comment_action(request):
-    # Authorization
-    auth = authorization(request)
-    if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
-
-    schema = {
-        "type": "object",
-        "description": "Structure of a body request to make comment action",
-        "maxProperties": 2,
-        "properties": {
-            "event_id": {
-                "description": "The unique identifier for event",
-                "type": "number",
-                "exclusiveMinimum": 0,
-            },
-            "content": {
-                "type": "string",
-                "maxLength": 1000
-            },
-        },
-        "required": ["event_id", "content"]
-    }
-    # validate the request body
-    try:
-        validate(instance=json.loads(request.body), schema=schema)
-    except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
-
-    # load model
-    comment = apps.get_model('Database', 'CommentTab')
-    event = apps.get_model('Database', 'EventTab')
-    res = {'status': 0, 'result': {}}
-
-    data = json.loads(request.body)
-
-    # get parameter
-    event_id = data.get('event_id', None)
-    user_id = auth.get('user_id', None)
-    content = data.get('content', None)
-
-    # query
-    if not is_valid_event(event_id) or not is_valid_user(user_id):
-        res['status'] = 1
+        # get parameter
+        status = data.get('flag', None)
+        event_id = data.get('event_id', None)
+        user_id = auth.get('user_id', None)
+        # query
+        if not is_valid_event(event_id) or not is_valid_user(user_id):
+            res['status']=1
+            return JsonResponse(res, status=400)
+        else:
+            obj = like.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'date': int(time.time()), 'status': ((status+1) % 2)})
+            like_id = list(like.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
+            count = len(like.objects.filter(event_id=event_id, status=1).values_list(flat=True))
+            result = {'like_id': like_id, 'count_like': count}
+            res['result'] = result
         return JsonResponse(res, status=201)
-    else:
-        obj = comment.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'date': int(time.time()), 'content': content})
-        cmt_id = list(comment.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
-        count = len(comment.objects.filter(event_id=event_id).values_list(flat=True))
-        result = {'comment_id': cmt_id, 'count_comment': count}
-        res['result'] = result
-    return JsonResponse(res, status=201)
+    return JsonResponse({'message': 'Method not allowed'}, status=405)
 
+@csrf_exempt
+def comment_action(request):
+    if request.method=='POST':
+        # Authorization
+        auth = authorization(request)
+        if auth['status'] >= 400:
+            return JsonResponse({'message': auth['message']}, status=auth['status'])
 
+        schema = {
+            "type": "object",
+            "description": "Structure of a body request to make comment action",
+            "maxProperties": 2,
+            "properties": {
+                "event_id": {
+                    "description": "The unique identifier for event",
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                },
+                "content": {
+                    "type": "string",
+                    "maxLength": 1000
+                },
+            },
+            "required": ["event_id", "content"]
+        }
+        # validate the request body
+        try:
+            validate(instance=json.loads(request.body), schema=schema)
+        except:
+            return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
+
+        # load model
+        comment = apps.get_model('Database', 'CommentTab')
+        event = apps.get_model('Database', 'EventTab')
+        res = {'status': 0, 'result': {}}
+
+        data = json.loads(request.body)
+
+        # get parameter
+        event_id = data.get('event_id', None)
+        user_id = auth.get('user_id', None)
+        content = data.get('content', None)
+
+        # query
+        if not is_valid_event(event_id) or not is_valid_user(user_id):
+            res['status'] = 1
+            return JsonResponse(res, status=201)
+        else:
+            obj = comment.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'date': int(time.time()), 'content': content})
+            cmt_id = list(comment.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
+            count = len(comment.objects.filter(event_id=event_id).values_list(flat=True))
+            result = {'comment_id': cmt_id, 'count_comment': count}
+            res['result'] = result
+        return JsonResponse(res, status=201)
+    return JsonResponse({'message': 'Method not allowed'}, status=405)
+
+@csrf_exempt
 def participate_action(request):
-    # Authorization
-    auth = authorization(request)
-    if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+    if request.method=='POST':
+        # Authorization
+        auth = authorization(request)
+        if auth['status'] >= 400:
+            return JsonResponse({'message': auth['message']}, status=auth['status'])
 
-    schema = {
-        "type": "object",
-        "description": "Structure of a body request to make participate action",
-        "maxProperties": 2,
-        "properties": {
-            "event_id": {
-                "description": "The unique identifier for event",
-                "type": "number",
-                "exclusiveMinimum": 0,
+        schema = {
+            "type": "object",
+            "description": "Structure of a body request to make participate action",
+            "maxProperties": 2,
+            "properties": {
+                "event_id": {
+                    "description": "The unique identifier for event",
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                },
+                "flag": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                },
             },
-            "flag": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1,
-            },
-        },
-        "required": ["event_id", "flag"]
-    }
-    # validate the request body
-    try:
-        validate(instance=json.loads(request.body), schema=schema)
-    except:
-        return HttpResponse("Validation Error in JSON schema", status=400)
-    # load model
-    participant = apps.get_model('Database', 'ParticipantTab')
-    res = {'status': 0, 'result': {}}
+            "required": ["event_id", "flag"]
+        }
+        # validate the request body
+        try:
+            validate(instance=json.loads(request.body), schema=schema)
+        except:
+            return JsonResponse({'message': "Validation Error in JSON schema"}, status=400)
+        # load model
+        participant = apps.get_model('Database', 'ParticipantTab')
+        res = {'status': 0, 'result': {}}
 
-    data = json.loads(request.body)
+        data = json.loads(request.body)
 
-    # get parameter
-    status = data.get('flag', None)
-    event_id = data.get('event_id', None)
-    user_id = auth.get('user_id', None)
-    # query
-    if not is_valid_event(event_id) or not is_valid_user(user_id):
-        res['status'] = 1
-        return JsonResponse(res, status=400)
-    else:
-        obj = participant.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'status': ((status+1) % 2)})
-        participant_id = list(participant.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
-        count = len(participant.objects.filter(event_id=event_id, status=1).values_list(flat=True))
-        result = {'participant_id': participant_id, 'count_participant': count}
-        res['result'] = result
-    return JsonResponse(res, status=201)
+        # get parameter
+        status = data.get('flag', None)
+        event_id = data.get('event_id', None)
+        user_id = auth.get('user_id', None)
+        # query
+        if not is_valid_event(event_id) or not is_valid_user(user_id):
+            res['status'] = 1
+            return JsonResponse(res, status=400)
+        else:
+            obj = participant.objects.update_or_create(event_id=event_id, user_id=user_id, defaults={'status': ((status+1) % 2)})
+            participant_id = list(participant.objects.filter(event_id=event_id, user_id=user_id).values_list(flat=True))[0]
+            count = len(participant.objects.filter(event_id=event_id, status=1).values_list(flat=True))
+            result = {'participant_id': participant_id, 'count_participant': count}
+            res['result'] = result
+        return JsonResponse(res, status=201)
+    return JsonResponse({'message': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt
@@ -514,31 +518,16 @@ def create_event(request):
     # Authorization
     auth = authorization(request)
     if auth['status'] >= 400:
-        return HttpResponse(content=auth['message'], status=auth['status'])
+        return JsonResponse({'message': auth['message']}, status=auth['status'])
     if auth['type'] == 1:
-        return HttpResponse('You don\'t have permission to access', status=403)
+        return JsonResponse({'message': 'No permission to access'}, status=403)
     if request.method == "POST":
         form = CreateEventForm(request.POST)
         if form.is_valid():
-            start_date = form.cleaned_data['start_date']
-            end_date = form.cleaned_data['end_date']
-            name = form.cleaned_data['name']
-            description = form.cleaned_data['description']
-            location = form.cleaned_data['location']
-            status = form.cleaned_data['status']
-            channel = form.cleaned_data['channel']
-            # load database to update
-            event_channel = apps.get_model('Database', 'EventChannelTab')
-            event = apps.get_model('Database', 'EventTab')
-            new_event = event.objects.create(name=name, start_date=start_date,
-                                             end_date=end_date, description=description,
-                                             location=location, status=status)
-            new_event.save()
-            list_channel = set([int(x) for x in channel.split(',')])
-            for item_id in list_channel:
-                event_channel.objects.create(channel_id=item_id, event_id=new_event.event_id)
+            check = create_event_from_data(form)
+            print(check)
     form = CreateEventForm()
-    return render(request, 'login.html', {'form': form})
+    return render(request, 'create_event.html', {'form': form})
 '''
 def update_event(request):
     # Authorization
@@ -617,7 +606,7 @@ def update_event(request):
 
 ############################################COMBINE####################################################
 
-
+'''
 @csrf_exempt
 def event_like(request):
     if request.method == 'GET':
@@ -646,3 +635,4 @@ def event_participant(request):
         return participate_action(request)
     else:
         return HttpResponse('Welcome', status=200)
+'''

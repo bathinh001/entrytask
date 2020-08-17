@@ -1,17 +1,9 @@
 from __future__ import unicode_literals
-from django.http import JsonResponse
-import json
-from jsonschema import validate
 from .forms import LoginForm
-from utils.utils_authentication import verify, attach_token
+from utils.utils_authentication import verify
+from utils.utils_authentication import response_login
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
-from django.shortcuts import redirect
-from django.shortcuts import HttpResponse
-from datetime import datetime, timedelta
-from Event.views import create_event
-
-TIME_EXPIRED = 360 #minutes
 
 
 @csrf_exempt
@@ -24,13 +16,11 @@ def login(request):
             password = form.cleaned_data['password']
             check = verify(username, password)
             if check:
-                type_user = check.get('type', None)
-                response = HttpResponse('Login successful', status=200)
-                token = attach_token(username, TIME_EXPIRED)
-                response.set_cookie(key='Authorization', value=token, expires=timedelta(minutes=TIME_EXPIRED)+datetime.utcnow())
-                return response
+                return response_login(username)
             else:
                 message = True
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form, 'message': message})
+
+

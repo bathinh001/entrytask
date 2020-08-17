@@ -11,7 +11,7 @@ from django.shortcuts import HttpResponse
 from datetime import datetime, timedelta
 from Event.views import create_event
 
-TIME_EXPIRED = 5 #minutes
+TIME_EXPIRED = 360 #minutes
 
 
 @csrf_exempt
@@ -26,9 +26,6 @@ def login(request):
             if check:
                 type_user = check.get('type', None)
                 response = HttpResponse('Login successful', status=200)
-                '''if type_user == 0:
-                    response = redirect(create_event)
-                    response.status_code = 301'''
                 token = attach_token(username, TIME_EXPIRED)
                 response.set_cookie(key='Authorization', value=token, expires=timedelta(minutes=TIME_EXPIRED)+datetime.utcnow())
                 return response

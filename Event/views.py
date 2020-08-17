@@ -117,6 +117,7 @@ def view_list_event(request):
                 "exclusiveMinimum": 0
             },
         },
+
         "required": ["limit", "page"]
     }
     # validate the request body

@@ -36,10 +36,10 @@ def create_participant():
     BATCH=100
     participant=[0]*BATCH
     for i in range(1,1000000):
-        participant[i%BATCH]=ParticipantTab()
-        participant[i%BATCH].status=1
-        participant[i%BATCH].user_id=randint(0,1000000)
-        participant[i%BATCH].event_id=randint(0,1000000)
+        participant[i%BATCH] = ParticipantTab()
+        participant[i%BATCH].status = 1
+        participant[i%BATCH].user_id = randint(0,1000000)
+        participant[i%BATCH].event_id = randint(0,1000000)
         check=list(ParticipantTab.objects.filter(event_id=participant[i%BATCH].event_id, user_id=participant[i%BATCH].user_id).values())
         if i%BATCH==0:
             for j in range(BATCH):

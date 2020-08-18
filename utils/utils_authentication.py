@@ -12,19 +12,21 @@ SECRET_KEY = '^gph2f8zqdsb-rog*a4lj=1k%5afio5vw_i4uvl683(^$r!u(9'
 ALGORITHM = 'HS512'
 
 def verify(username, password):
-    hash_pw = str(hashlib.sha512(password).hexdigest())
     cache_key = username
-    stored_pw = cache.get(cache_key, None)
-    if not stored_pw:
+    data = cache.get(cache_key, None)
+    if not data:
         try:
-            data = UserTab.objects.values('type', 'password').get(username=username)
+            data = list(UserTab.objects.values('password', 'salt').filter(username=username))[0]
         except:
-            return None
-        stored_pw = data.get('password', None)
+            return False
+    print(data)
+    stored_pw = data.get('password', None)
+    salt = data.get('salt', None)
+    hash_pw = str(hashlib.sha512(password+salt).hexdigest())
     if not stored_pw or hash_pw[:100] != stored_pw:
-        return None
-    cache.set(cache_key, stored_pw)
-    return {username: stored_pw}
+        return False
+    cache.set(cache_key, {"password": stored_pw, "salt": salt})
+    return True
 ##################################################################################################
 
 

@@ -19,7 +19,6 @@ def verify(username, password):
             data = list(UserTab.objects.values('password', 'salt').filter(username=username))[0]
         except:
             return False
-    print(data)
     stored_pw = data.get('password', None)
     salt = data.get('salt', None)
     hash_pw = str(hashlib.sha512(password+salt).hexdigest())

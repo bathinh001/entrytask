@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+</head>
+<body>
+<h1>Sign up </h1>
+    <form class="site-form" method="post">
+        {{ form.as_ul }}
+        <input type="submit" value="Login"/>
+    </form>
+    {% if message %}
+    <h3> Username existed </h3>
+    {% endif %}
+</body>
+</html>

@@ -55,9 +55,9 @@ def create_user():
         user = UserTab()
         user.salt = uuid.uuid4().hex
         user.username = names.get_first_name()+'_'*randint(0,2)+str(randint(0,1000000))+names.get_last_name()
-        user.password=hashlib.sha512(user.username + user.salt).hexdigest()
-        user.fullname=names.get_full_name()
-        user.type=1
+        user.password = hashlib.sha512(user.username + user.salt).hexdigest()
+        user.fullname = names.get_full_name()
+        user.type = 1
         user.save()
         if (i%20000==0):
             print(i)

@@ -9,8 +9,7 @@ from django import forms
 from django.http import JsonResponse
 
 SECRET_KEY = '^gph2f8zqdsb-rog*a4lj=1k%5afio5vw_i4uvl683(^$r!u(9'
-ALGORITHM='HS512'
-
+ALGORITHM = 'HS512'
 
 def verify(username, password):
     hash_pw = str(hashlib.sha512(password).hexdigest())

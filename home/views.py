@@ -7,6 +7,7 @@ from utils.utils_database import is_existed
 from utils.utils_database import create_user_from_data
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
+from django.shortcuts import HttpResponse
 
 
 @csrf_exempt
@@ -22,9 +23,12 @@ def login(request):
                 return response_login(username)
             else:
                 message = True
+    '''
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form, 'message': message})
+    '''
+    return HttpResponse('Hello', status=200)
 
 @csrf_exempt
 def signup(request):

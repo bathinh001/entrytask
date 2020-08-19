@@ -206,4 +206,3 @@ class CommentTab(models.Model):
         managed = False
         db_table = 'comment_tab'
         unique_together = (('user_id', 'event_id'), ('user_id', 'event_id'),)
-

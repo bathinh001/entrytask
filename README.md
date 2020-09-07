@@ -1,5 +1,3 @@
-# EntryTask_SEA
-
 Database:
     models.py: contain models to interact with database
     insert_func_db.py: dummy file to generate data in db
